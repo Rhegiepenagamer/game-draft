@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wika Play - A Magical Journey</title>
+    <style>
+        :root {
+            --gold: #f5e1a4;
+            --dark-gold: #b5651d;
+            --magic-purple: #2c1e3d;
+            --glass: rgba(0, 0, 0, 0.6);
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Georgia', serif;
+            overflow: hidden;
+            background: #111;
+        }
+
+        /* Background Container */
+        .game-container {
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7)), 
+                        url('https://raw.githubusercontent.com/Diavolo148888/WikaPlay/300eb214c6c9e40145568c87d72a33ad90657155/background.jpg.png');
+            background-size: 40%;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.5s ease;
+        }
+
+        /* Screens */
+        .screen {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .active { display: flex; }
+
+        /* Typography */
+        h1 {
+            font-size: 5rem;
+            color: var(--gold);
+            margin: 0;
+            text-shadow: 0 0 20px rgba(245, 225, 164, 0.5), 4px 4px 5px #000;
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            color: #d1d1d1;
+            font-style: italic;
+            margin-bottom: 50px;
+        }
+
+        /* Buttons */
+        .btn {
+            background: var(--dark-gold);
+            color: white;
+            padding: 15px 40px;
+            border: 2px solid var(--gold);
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            margin: 10px;
+            min-width: 200px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+        }
+
+        .btn:hover {
+            background: #e68a00;
+            transform: scale(1.05);
+            box-shadow: 0 0 20px var(--gold);
+        }
+
+        .btn:disabled {
+            background: #444;
+            border-color: #666;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        /* Play Button Image */
+        .play-img {
+            cursor: pointer;
+            width: 300px;
+            height: 400px;
+            transition: all 0.3s ease;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.4));
+        }
+
+        .play-img:hover {
+            transform: scale(1.05);
+            filter: drop-shadow(0 0 20px rgba(245, 225, 164, 0.8));
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gold);
+            transition: width 0.3s ease;
+        }
+
+        /* Category List */
+        .scroll-area {
+            background: var(--glass);
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid var(--gold);
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .category-item {
+            margin-bottom: 20px;
+        }
+
+        /* Level Grid */
+        .level-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            padding: 20px;
+        }
+
+        .lvl-btn {
+            width: 60px;
+            height: 60px;
+            background: #333;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 10px;
+        }
+
+        .lvl-btn.correct { background: #2d5a27; color: white; }
+        .lvl-btn.wrong { background: #8b2e2e; color: white; }
+        .lvl-btn:disabled { opacity: 0.3; cursor: default; }
+
+        .day-label {
+            color: var(--gold);
+            margin-top: 20px;
+            border-bottom: 1px solid var(--dark-gold);
+            padding-bottom: 5px;
+        }
+
+        .day-locked {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    
+    <div id="start-screen" class="screen active">
+        <h1>Wika Play</h1>
+        <div class="subtitle">A Magical Language Journey</div>
+        <img src="https://raw.githubusercontent.com/Diavolo148888/WikaPlay/300eb214c6c9e40145568c87d72a33ad90657155/play_button.webp" onclick="showScreen('category-screen')" class="play-img" alt="Play Button">
+        <button class="btn" style="font-size: 0.8rem; padding: 10px;" onclick="resetGame()">Reset Game</button>
+        <button class="btn" style="font-size: 0.8rem; padding: 10px;" onclick="window.close()">Exit</button>
+    </div>
+
+    <div id="category-screen" class="screen">
+        <h2 style="color: var(--gold); font-size: 2rem;">Select Month</h2>
+        <div class="progress-bar" id="overall-progress">
+            <div class="progress-fill" id="overall-fill"></div>
+        </div>
+        <div class="scroll-area" id="category-list">
+            </div>
+        <button class="btn" style="margin-top:20px" onclick="showScreen('start-screen')">Back</button>
+    </div>
+
+    <div id="level-screen" class="screen" style="justify-content: flex-start; overflow-y: auto; padding-top: 50px;">
+        <h2 id="current-month-name" style="color: var(--gold);">Month</h2>
+        <div id="level-container">
+            </div>
+        <button class="btn" onclick="showScreen('category-screen')">Back</button>
+    </div>
+
+</div>
+
+<script>
+    // Game Data State
+    const categories = ["First Month", "Second Month", "Third Month", "Last Month"];
+    let gameState = JSON.parse(localStorage.getItem('wika_progress')) || {
+        progress: [false, false, false, false],
+        scores: [0, 0, 0, 0],
+        results: categories.map(() => ({
+            answered: Array(150).fill(false),
+            correct: Array(150).fill(false)
+        }))
+    };
+
+    // Generate shuffled order for each day in each month, different for each user
+    let shuffledLevels = categories.map(() => Array.from({length: 15}, () => shuffleArray([...Array(10).keys()])));
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function saveGame() {
+        localStorage.setItem('wika_progress', JSON.stringify(gameState));
+    }
+
+    function resetGame() {
+        localStorage.removeItem('wika_progress');
+        location.reload();
+    }
+
+    function showScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+        if(screenId === 'category-screen') renderCategories();
+    }
+
+    function renderCategories() {
+        const list = document.getElementById('category-list');
+        list.innerHTML = '';
+        categories.forEach((name, i) => {
+            const isLocked = i > 0 && !gameState.progress[i-1];
+            const btn = document.createElement('button');
+            btn.className = 'btn';
+            btn.disabled = isLocked;
+            btn.innerHTML = `${name}<br><small>Score: ${gameState.scores[i]}/150</small>`;
+            btn.onclick = () => startLevels(i);
+            
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'category-item';
+            itemDiv.appendChild(btn);
+            
+            // Add progress bar for each month
+            const progressBar = document.createElement('div');
+            progressBar.className = 'progress-bar';
+            const progressFill = document.createElement('div');
+            progressFill.className = 'progress-fill';
+            const percentage = (gameState.scores[i] / 150) * 100;
+            progressFill.style.width = `${percentage}%`;
+            progressBar.appendChild(progressFill);
+            itemDiv.appendChild(progressBar);
+            
+            list.appendChild(itemDiv);
+        });
+        
+        // Update overall progress
+        const totalCorrect = gameState.scores.reduce((a, b) => a + b, 0);
+        const overallPercentage = (totalCorrect / 600) * 100;
+        document.getElementById('overall-fill').style.width = `${overallPercentage}%`;
+    }
+
+    function isDayCompleted(catIdx, d) {
+        const catRes = gameState.results[catIdx];
+        for (let l = 0; l < 10; l++) {
+            const gIdx = d * 10 + l;
+            if (!catRes.answered[gIdx]) return false;
+        }
+        return true;
+    }
+
+    function startLevels(catIdx) {
+        document.getElementById('current-month-name').innerText = categories[catIdx];
+        const container = document.getElementById('level-container');
+        container.innerHTML = '';
+
+        for (let d = 0; d < 15; d++) {
+            const dayDiv = document.createElement('div');
+            dayDiv.innerHTML = `<div class="day-label">Day ${d+1}</div>`;
+            const grid = document.createElement('div');
+            grid.className = 'level-grid';
+
+            const shuffled = shuffledLevels[catIdx][d]; // Get shuffled order for this day
+
+            shuffled.forEach((l, idx) => {
+                const gIdx = d * 10 + l;
+                const btn = document.createElement('button');
+                btn.className = 'lvl-btn';
+                btn.innerText = l + 1;
+                
+                // Logic for disabling/coloring
+                const catRes = gameState.results[catIdx];
+                if (catRes.answered[gIdx]) {
+                    btn.classList.add(catRes.correct[gIdx] ? 'correct' : 'wrong');
+                    btn.disabled = true;
+                } else {
+                    // Enable only if all previous in shuffled order are answered
+                    const prevInOrder = shuffled.slice(0, idx).every(prevL => catRes.answered[d * 10 + prevL]);
+                    btn.disabled = !prevInOrder;
+                }
+
+                btn.onclick = () => askQuestion(catIdx, gIdx);
+                grid.appendChild(btn);
+            });
+            dayDiv.appendChild(grid);
+
+            // Lock day if previous day not completed
+            const isUnlocked = d === 0 || isDayCompleted(catIdx, d - 1);
+            if (!isUnlocked) {
+                dayDiv.classList.add('day-locked');
+            }
+
+            container.appendChild(dayDiv);
+        }
+        showScreen('level-screen');
+    }
+
+    function askQuestion(catIdx, gIdx) {
+        const answer = prompt(`Category ${catIdx+1} - Level ${gIdx+1}\nEnter your answer:`);
+        if (answer !== null) {
+            const isCorrect = answer.trim().length > 0; // Simple logic as requested
+            gameState.results[catIdx].answered[gIdx] = true;
+            gameState.results[catIdx].correct[gIdx] = isCorrect;
+            
+            // Check if month complete
+            if (gameState.results[catIdx].answered.every(v => v)) {
+                gameState.progress[catIdx] = true;
+            }
+
+            gameState.scores[catIdx] = gameState.results[catIdx].correct.filter(v => v).length;
+            
+            saveGame();
+            startLevels(catIdx); // Refresh
+        }
+    }
+
+    // Initialize
+    renderCategories();
+</script>
+
+</body>
+</html>
